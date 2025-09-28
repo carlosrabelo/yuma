@@ -1,0 +1,117 @@
+# ESP Stratum Proxy Makefile
+# Build automation for PlatformIO projects
+
+# Board/target selection
+SUPPORTED_BOARDS:=esp8266 esp32 esp8266_oled esp32_oled
+BOARD		?= esp32
+
+ifeq ($(BOARD),esp32)
+BUILD_ENV	:= esp32dev
+AUTO_UPLOAD_ENVS:=esp32dev esp_wroom_02
+else ifeq ($(BOARD),esp8266)
+BUILD_ENV	:= esp_wroom_02
+AUTO_UPLOAD_ENVS:=esp_wroom_02 esp32dev
+else ifeq ($(BOARD),esp32_oled)
+BUILD_ENV	:= esp32dev_oled
+AUTO_UPLOAD_ENVS:=esp32dev_oled esp32dev esp_wroom_02_oled esp_wroom_02
+else ifeq ($(BOARD),esp8266_oled)
+BUILD_ENV	:= esp_wroom_02_oled
+AUTO_UPLOAD_ENVS:=esp_wroom_02_oled esp_wroom_02 esp32dev_oled esp32dev
+else
+$(error Unsupported BOARD '$(BOARD)'. Supported values: $(SUPPORTED_BOARDS))
+endif
+
+UPLOAD_ENV_ARGS:=$(foreach env,$(AUTO_UPLOAD_ENVS),--env $(env))
+
+# Variables
+PLATFORM	= platformio
+SRC_DIR		= src
+BUILD_DIR	= .pio/build/$(BUILD_ENV)
+MONITOR_PORT	= /dev/ttyUSB0
+UPLOAD_PORT	= /dev/ttyUSB0
+MONITOR_SPEED	= 115200
+
+# PlatformIO installation check and activation
+PYTHON_VENV	= ~/.platformio/penv
+PIO_ACTIVATE	= . $(PYTHON_VENV)/bin/activate &&
+
+# Default target - show help
+.DEFAULT_GOAL := help
+
+.PHONY: help all build upload monitor clean install deps lint format check check-pio _run-pio
+
+help:	## Show this help
+	@echo "ESP Stratum Proxy - Available targets (BOARD=$(BOARD)):"
+	@echo "  - Supported BOARD values: $(SUPPORTED_BOARDS)"
+	@echo "  - Override BOARD on the command line, e.g. 'make BOARD=esp32 build'"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
+
+check-pio:	## Check if PlatformIO is installed and available
+	@echo "Checking PlatformIO installation..."
+	@if command -v $(PLATFORM) >/dev/null 2>&1; then \
+		echo "✓ PlatformIO found in PATH"; \
+		$(PLATFORM) --version; \
+	elif [ -f $(PYTHON_VENV)/bin/activate ] && [ -f $(PYTHON_VENV)/bin/$(PLATFORM) ]; then \
+		echo "✓ PlatformIO found in virtual environment"; \
+		$(PIO_ACTIVATE) $(PLATFORM) --version; \
+	elif [ -f ~/.local/bin/$(PLATFORM) ]; then \
+		echo "✓ PlatformIO found in ~/.local/bin"; \
+		~/.local/bin/$(PLATFORM) --version; \
+	else \
+		echo "✗ PlatformIO not found. Install with:"; \
+		echo "  curl -fsSL https://raw.githubusercontent.com/platformio/platformio-installer-script/master/get-platformio.py -o get-platformio.py"; \
+		echo "  python3 get-platformio.py"; \
+		exit 1; \
+	fi
+
+all: check-pio build	## Build the project
+
+build: check-pio	## Build the project
+	@$(MAKE) --no-print-directory _run-pio ARGS="run --environment $(BUILD_ENV)"
+
+upload: check-pio	## Upload firmware to target board
+	@python3 scripts/pio_auto_upload.py $(UPLOAD_ENV_ARGS) $(if $(UPLOAD_PORT),--port $(UPLOAD_PORT),)
+
+monitor: check-pio ## Start serial monitor
+	@$(MAKE) --no-print-directory _run-pio ARGS="device monitor --port $(MONITOR_PORT) --baud $(MONITOR_SPEED)"
+
+flash: build upload	## Build and upload firmware
+
+deps: check-pio	## Install project dependencies
+	@$(MAKE) --no-print-directory _run-pio ARGS="pkg install"
+
+install: deps	## Install dependencies (alias for deps)
+
+clean: check-pio	## Clean build artifacts
+	@$(MAKE) --no-print-directory _run-pio ARGS="run --target clean"
+	@rm -rf .pio/build .pio/libdeps 2>/dev/null || true
+
+check: check-pio	## Check project configuration
+	@$(MAKE) --no-print-directory _run-pio ARGS="check --environment $(BUILD_ENV)"
+
+# Internal target to run PlatformIO with proper activation
+_run-pio:
+	@if command -v $(PLATFORM) >/dev/null 2>&1; then \
+		$(PLATFORM) $(ARGS); \
+	elif [ -f $(PYTHON_VENV)/bin/activate ] && [ -f $(PYTHON_VENV)/bin/$(PLATFORM) ]; then \
+		$(PIO_ACTIVATE) $(PLATFORM) $(ARGS); \
+	elif [ -f ~/.local/bin/$(PLATFORM) ]; then \
+		~/.local/bin/$(PLATFORM) $(ARGS); \
+	else \
+		echo "✗ PlatformIO not available. Run 'make check-pio' for installation instructions."; \
+		exit 1; \
+	fi
+
+lint:	## Run code linting
+	@echo "No linting configured yet"
+
+format:	## Format source code
+	@echo "No formatting configured yet"
+
+info:	## Show project information
+	@echo "Project: ESP Stratum Proxy"
+	@echo "Board: $(BOARD)"
+	@echo "Environment: $(BUILD_ENV)"
+	@echo "Source: $(SRC_DIR)"
+	@echo "Build: $(BUILD_DIR)"
