@@ -8,6 +8,7 @@
 
 #include "app_context.h"
 #include "config_manager.h"
+#include "mdns_service.h"
 #include "pool_client.h"
 #include "status_display.h"
 #include "storage.h"
@@ -15,10 +16,12 @@
 #include "web_interface.h"
 #include "wifi_setup.h"
 
+static bool services_initialized = false;
+
 void setup() {
     Serial.begin(115200);
     Serial.println();
-    Serial.println("=== YUNA Stratum Proxy ===");
+    Serial.println("=== YUMA Stratum Proxy ===");
     Serial.printf("Target board: %s\n", GetBoardName());
 
 #ifdef USE_OLED_STATUS
@@ -33,19 +36,55 @@ void setup() {
 
     LoadConfig(config);
     SetupWifi();
-    SetupWebServer();
-    SetupStratumServer();
 
-    Serial.println("System initialized!");
+    // Only setup services after WiFi is connected
+    if (WiFi.status() == WL_CONNECTED) {
+        SetupMDNS();
+        SetupWebServer();
+        SetupStratumServer();
+        services_initialized = true;
+        Serial.println("System initialized!");
+    } else {
+        Serial.println("WiFi not connected, services will start after connection");
+    }
 }
 
 void loop() {
-    if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("WiFi disconnected, trying to reconnect...");
-        WiFi.disconnect(false);
+    static unsigned long last_wifi_check = 0;
+
+    if (WiFi.status() != WL_CONNECTED && millis() - last_wifi_check > 10000) {
+        last_wifi_check = millis();
+        Serial.printf("WiFi disconnected (status: %d), attempting reconnection...\n", WiFi.status());
+
+        // Try to reconnect with saved credentials
         WiFi.begin();
-        delay(5000);
+
+        // Wait for connection with timeout
+        int attempts = 0;
+        while (WiFi.status() != WL_CONNECTED && attempts < 30) {
+            delay(500);
+            Serial.print(".");
+            attempts++;
+        }
+
+        if (WiFi.status() == WL_CONNECTED) {
+            Serial.println("\nWiFi reconnected!");
+            DebugWifiStatus();
+        } else {
+            Serial.println("\nFailed to reconnect automatically");
+            Serial.println("To reconfigure WiFi, restart device or call ResetWifiSettings()");
+        }
         return;
+    }
+
+    // Initialize services once WiFi is connected
+    if (!services_initialized && WiFi.status() == WL_CONNECTED) {
+        Serial.println("WiFi connected! Initializing services...");
+        SetupMDNS();
+        SetupWebServer();
+        SetupStratumServer();
+        services_initialized = true;
+        Serial.println("Services initialized!");
     }
 
     if (ShouldConnectToPool() && !pool_client.connected()) {
@@ -65,6 +104,7 @@ void loop() {
 #endif
 
     HandleMinerConnections();
+    UpdateMDNS();
 
     delay(100);
 }

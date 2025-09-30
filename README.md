@@ -11,6 +11,7 @@ Stratum V1 proxy firmware with an intuitive web interface that now runs on both 
 - **VarDiff Settings**: optional automatic difficulty targets
 - **Persistent Configuration**: LittleFS/SPIFFS-backed JSON configuration storage
 - **Auto-reconnection**: retries Wi-Fi and pool links automatically
+- **mDNS Discovery**: accessible via `yuma.local` for easy NerdMiner setup
 
 ## 🔧 Supported Hardware
 
@@ -58,7 +59,7 @@ make upload  # picks ESP8266/ESP32 automatically based on the connected board
 ## 🌐 Initial Setup
 
 1. Flash the firmware and reset the board
-2. Join the temporary Wi-Fi network `YUNA-StratumProxy` (password `12345678`)
+2. Join the temporary Wi-Fi network `YUMA-PROXY` (password `12345678`)
 3. Follow the captive-portal wizard to store your Wi-Fi credentials
 4. After the board connects, browse to `http://<device-ip>`
 

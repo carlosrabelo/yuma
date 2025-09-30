@@ -221,8 +221,8 @@ sed -i \
 
 # Update all environment sections with the selected port
 sed -i \
-    -e "s|^upload_port.*|upload_port = $SELECTED_PORT|g" \
-    -e "s|^monitor_port.*|monitor_port = $SELECTED_PORT|g" \
+    -e "s|^[[:space:]]*upload_port.*|upload_port = $SELECTED_PORT|g" \
+    -e "s|^[[:space:]]*monitor_port.*|monitor_port = $SELECTED_PORT|g" \
     "$PLATFORMIO_INI"
 
 echo "✅ Updated $PLATFORMIO_INI with:"
@@ -244,9 +244,14 @@ if [ -f "Makefile" ]; then
             ;;
     esac
 
-    # Update Makefile BOARD default
-    sed -i.bak "s|^BOARD\s*?=.*|BOARD\t\t?= $MAKEFILE_BOARD|g" Makefile
+    # Update Makefile BOARD default and ports
+    sed -i.bak \
+        -e "s|^BOARD\s*?=.*|BOARD\t\t?= $MAKEFILE_BOARD|g" \
+        -e "s|^MONITOR_PORT\s*=.*|MONITOR_PORT\t= $SELECTED_PORT|g" \
+        -e "s|^UPLOAD_PORT\s*=.*|UPLOAD_PORT\t= $SELECTED_PORT|g" \
+        Makefile
     echo "✅ Updated Makefile default BOARD to: $MAKEFILE_BOARD"
+    echo "✅ Updated Makefile ports to: $SELECTED_PORT"
 fi
 
 echo ""

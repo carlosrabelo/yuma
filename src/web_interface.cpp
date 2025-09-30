@@ -16,7 +16,12 @@
 #include "wifi_setup.h"
 
 void SetupWebServer() {
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+    if (server != nullptr) {
+        delete server;
+    }
+    server = new AsyncWebServer(80);
+
+    server->on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
         String html = R"HTML(
 <!DOCTYPE html>
 <html>
@@ -52,6 +57,7 @@ void SetupWebServer() {
                     '<div class="metric"><span>Last Job:</span><span>' + data.last_job_id + '</span></div>' +
                     '<div class="metric"><span>Connected Miners:</span><span>' + data.connected_miners_count + '</span></div>' +
                     '<div class="metric"><span>IP Address:</span><span>' + data.ip_address + '</span></div>' +
+                    '<div class="metric"><span>mDNS Address:</span><span><a href="http://yuma.local" target="_blank">yuma.local</a></span></div>' +
                     '<div class="metric"><span>Gateway:</span><span>' + data.gateway + '</span></div>' +
                     '<div class="metric"><span>Static IP Mode:</span><span class="' + (data.static_ip_mode ? 'green">Enabled' : 'orange">DHCP') + '</span></div>' +
                     '<div class="metric"><span>WiFi RSSI:</span><span>' + data.wifi_rssi + ' dBm</span></div>';
@@ -137,7 +143,7 @@ void SetupWebServer() {
         request->send(200, "text/html", html);
     });
 
-    server.on("/api/status", HTTP_GET, [](AsyncWebServerRequest* request) {
+    server->on("/api/status", HTTP_GET, [](AsyncWebServerRequest* request) {
         DynamicJsonDocument doc(512);
 
         unsigned long uptime_seconds = (millis() - metrics.uptime_start) / 1000;
@@ -159,7 +165,7 @@ void SetupWebServer() {
         request->send(200, "application/json", response);
     });
 
-    server.on("/config", HTTP_POST, [](AsyncWebServerRequest* request) {
+    server->on("/config", HTTP_POST, [](AsyncWebServerRequest* request) {
         if (request->hasParam("pool_host", true)) {
             CopyStringField(config.pool_host, sizeof(config.pool_host), request->getParam("pool_host", true)->value());
         }
@@ -218,23 +224,23 @@ void SetupWebServer() {
         request->redirect("/");
     });
 
-    server.on("/restart", HTTP_GET, [](AsyncWebServerRequest* request) {
+    server->on("/restart", HTTP_GET, [](AsyncWebServerRequest* request) {
         request->send(200, "text/plain", "Restarting...");
         delay(1000);
         ESP.restart();
     });
 
-    server.on("/reset_wifi", HTTP_GET, [](AsyncWebServerRequest* request) {
+    server->on("/reset_wifi", HTTP_GET, [](AsyncWebServerRequest* request) {
         request->send(200, "text/plain", "Resetting WiFi...");
         ResetWifiSettings();
         delay(1000);
         ESP.restart();
     });
 
-    server.on("/test_pool", HTTP_GET, [](AsyncWebServerRequest* request) {
+    server->on("/test_pool", HTTP_GET, [](AsyncWebServerRequest* request) {
         request->send(200, "text/plain", "Pool test not implemented yet");
     });
 
-    server.begin();
+    server->begin();
     Serial.println("Web server started");
 }

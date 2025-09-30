@@ -17,7 +17,7 @@
 extern Config config;
 extern Metrics metrics;
 extern WiFiClient pool_client;
-extern AsyncWebServer server;
+extern AsyncWebServer* server;
 extern AsyncServer stratum_server;
 extern std::vector<AsyncClient*> connected_miners;
 

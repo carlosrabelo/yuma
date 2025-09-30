@@ -13,7 +13,7 @@
 Config config = CreateDefaultConfig();
 Metrics metrics{};
 WiFiClient pool_client;
-AsyncWebServer server(80);
+AsyncWebServer* server = nullptr;
 AsyncServer stratum_server(4444);
 std::vector<AsyncClient*> connected_miners;
 
