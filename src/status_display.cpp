@@ -42,7 +42,7 @@ void SetupStatusDisplay() {
     status_display.setTextWrap(false);
     status_display.setTextSize(TEXT_SIZE_SMALL);
     status_display.setCursor(0, 0);
-    status_display.println("ESP Stratum Proxy");
+    status_display.println("YUMA Stratum Proxy");
     status_display.print("Board: ");
     status_display.println(GetBoardName());
     status_display.display();

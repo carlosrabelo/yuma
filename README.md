@@ -1,4 +1,4 @@
-# ESP Stratum Proxy
+# YUMA Stratum Proxy
 
 Stratum V1 proxy firmware with an intuitive web interface that now runs on both ESP-WROOM modules (ESP8266) and ESP32 development boards. Configure Wi-Fi, mining pools, and monitor real-time metrics directly from the device.
 
@@ -110,7 +110,7 @@ The OLED view refreshes every second showing IP address, pool status, connected 
 ## 📊 Web Interface
 
 ```
-🚀 ESP Stratum Proxy
+🚀 YUMA Stratum Proxy
 ┌─────────────────────────────┐
 │ 📊 System Status            │
 │ Pool Status: Connected ✅   │

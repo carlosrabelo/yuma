@@ -1,4 +1,4 @@
-# ESP Stratum Proxy Makefile
+# YUMA Stratum Proxy Makefile
 # Build automation for PlatformIO projects
 
 # Board/target selection
@@ -41,7 +41,7 @@ PIO_ACTIVATE	= . $(PYTHON_VENV)/bin/activate &&
 .PHONY: help all build upload monitor clean install deps lint format check check-pio detect erase _run-pio
 
 help:	## Show this help
-	@echo "ESP Stratum Proxy - Available targets (BOARD=$(BOARD)):"
+	@echo "YUMA Stratum Proxy - Available targets (BOARD=$(BOARD)):"
 	@echo "  - Supported BOARD values: $(SUPPORTED_BOARDS)"
 	@echo "  - Override BOARD on the command line, e.g. 'make BOARD=esp32 build'"
 	@echo ""
@@ -117,7 +117,7 @@ erase: check-pio	## Erase flash memory completely
 	@$(MAKE) --no-print-directory _run-pio ARGS="run --target erase --environment $(BUILD_ENV)"
 
 info:	## Show project information
-	@echo "Project: ESP Stratum Proxy"
+	@echo "Project: YUMA Stratum Proxy"
 	@echo "Board: $(BOARD)"
 	@echo "Environment: $(BUILD_ENV)"
 	@echo "Source: $(SRC_DIR)"
