@@ -1,5 +1,5 @@
 [platformio]
-default_envs = esp_wroom_02, esp32dev
+default_envs = esp32dev
 
 [env]
 framework = arduino
@@ -27,8 +27,8 @@ build_flags =
 [env:esp_wroom_02]
 platform = espressif8266
 board = esp_wroom_02
-upload_port = /dev/ttyUSB0
-monitor_port = /dev/ttyUSB0
+upload_port = /dev/ttyUSB1
+monitor_port = /dev/ttyUSB1
 board_build.filesystem = littlefs
 lib_deps =
     ${env.lib_deps}

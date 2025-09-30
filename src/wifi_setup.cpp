@@ -1,7 +1,6 @@
 #include "wifi_setup.h"
 
 #include <Arduino.h>
-#include <WiFiManager.h>
 
 #if defined(ESP32)
 #include <WiFi.h>
@@ -10,9 +9,10 @@
 #endif
 
 #include "app_context.h"
+#include "wifi_manager_wrapper.h"
 
 namespace {
-WiFiManager wifiManager;
+WiFiManagerWrapper wifiManager;
 }
 
 bool ConfigureStaticIp(IPAddress& ip_out, IPAddress& gateway_out,
