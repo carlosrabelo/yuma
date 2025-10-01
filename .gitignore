@@ -10,3 +10,6 @@ Makefile
 
 # Backup files are now organized in backup/ directory
 backup/
+
+# Generated firmware assets (binaries for web flasher)
+assets/
