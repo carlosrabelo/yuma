@@ -155,6 +155,7 @@ assets-esp8266: check-pio	## Generate ESP8266 firmware binaries
 assets-clean:	## Clean assets directory
 	@echo "🧹 Cleaning assets directory..."
 	@rm -rf $(ASSETS_DIR)/firmware/*
+	@sleep 0.1
 	@mkdir -p $(FIRMWARE_DIR)/esp32/{standard,oled} $(FIRMWARE_DIR)/esp8266/{standard,oled}
 
 assets-manifest: ## Generate manifest.json for web flasher
@@ -200,11 +201,12 @@ _build-and-copy:
 	@$(MAKE) --no-print-directory _run-pio ARGS="run --environment $(ENV)" >/dev/null 2>&1
 	@TARGET_DIR="$(FIRMWARE_DIR)/$(CHIP)/$(VARIANT)"; \
 	BUILD_PATH=".pio/build/$(ENV)"; \
+	mkdir -p "$$TARGET_DIR"; \
 	if [ -f "$$BUILD_PATH/firmware.bin" ]; then \
-		cp "$$BUILD_PATH/firmware.bin" "$$TARGET_DIR/yuma-$(CHIP)-$(VARIANT)-$(VERSION_CLEAN).bin"; \
+		cp "$$BUILD_PATH/firmware.bin" "$$TARGET_DIR/yuma-$(CHIP)-$(VARIANT)-$(VERSION_CLEAN).bin" && \
 		echo "    ✅ $$TARGET_DIR/yuma-$(CHIP)-$(VARIANT)-$(VERSION_CLEAN).bin"; \
 	fi; \
 	if [ "$(CHIP)" = "esp32" ] && [ -f "$$BUILD_PATH/bootloader.bin" ]; then \
-		cp "$$BUILD_PATH/bootloader.bin" "$$TARGET_DIR/"; \
+		cp "$$BUILD_PATH/bootloader.bin" "$$TARGET_DIR/" && \
 		echo "    ✅ $$TARGET_DIR/bootloader.bin"; \
 	fi

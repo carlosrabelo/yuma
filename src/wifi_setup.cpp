@@ -4,15 +4,22 @@
 
 #if defined(ESP32)
 #include <WiFi.h>
+#include <WiFiManager.h>
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
+#include <ESPAsync_WiFiManager.h>
 #endif
 
-#include <WiFiManager.h>
 #include "app_context.h"
 
 namespace {
+#if defined(ESP32)
 WiFiManager wifiManager;
+#elif defined(ESP8266)
+AsyncWebServer server(80);
+AsyncDNSServer dns;
+ESPAsync_WiFiManager wifiManager(&server, &dns);
+#endif
 
 constexpr char kPortalSsid[] = "YUMA-PROXY";
 constexpr char kPortalPassword[] = "12345678";
@@ -59,7 +66,11 @@ bool ConfigureStaticIp(IPAddress& ip_out, IPAddress& gateway_out,
         dns_out = gateway_out;
     }
 
+#if defined(ESP32)
     wifiManager.setSTAStaticIPConfig(ip_out, gateway_out, subnet_out, dns_out);
+#elif defined(ESP8266)
+    wifiManager.setSTAStaticIPConfig(ip_out, gateway_out, subnet_out);
+#endif
 #if defined(ESP8266) || defined(ESP32)
     WiFi.config(ip_out, gateway_out, subnet_out, dns_out);
 #endif
@@ -85,17 +96,25 @@ void SetupWifi() {
                                     IPAddress(255, 255, 255, 0));
     wifiManager.setConfigPortalTimeout(300);  // 5 minutes
     wifiManager.setConnectTimeout(30);
+#if defined(ESP32)
     wifiManager.setConnectRetries(3);
-    wifiManager.setBreakAfterConfig(true);
     wifiManager.setWiFiAutoReconnect(true);
+#endif
+    wifiManager.setBreakAfterConfig(true);
 
     // Enable debug info
     wifiManager.setDebugOutput(true);
 
     // Save parameters to flash automatically
+#if defined(ESP32)
     wifiManager.setSaveParamsCallback([]() {
         Serial.println("WiFi parameters saved!");
     });
+#elif defined(ESP8266)
+    wifiManager.setSaveConfigCallback([]() {
+        Serial.println("WiFi parameters saved!");
+    });
+#endif
 
     // IMPORTANT: Allow WiFi credentials to be saved
     WiFi.persistent(true);
