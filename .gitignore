@@ -7,4 +7,6 @@
 # Auto-generated configuration files (use templates instead)
 platformio.ini
 Makefile
-*.bak
+
+# Backup files are now organized in backup/ directory
+backup/
