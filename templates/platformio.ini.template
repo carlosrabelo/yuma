@@ -7,8 +7,7 @@ monitor_speed = 115200
 upload_speed = 921600
 lib_deps =
     bblanchon/ArduinoJson@^6.21.3
-    me-no-dev/ESPAsyncWebServer@^3.6.0
-    tzapu/WiFiManager@^2.0.17
+    me-no-dev/ESPAsyncWebServer@^1.2.3
     adafruit/Adafruit GFX Library@^1.11.11
     adafruit/Adafruit SSD1306@^2.5.9
 
@@ -20,6 +19,7 @@ monitor_port = /dev/ttyUSB0
 lib_deps =
     ${env.lib_deps}
     me-no-dev/AsyncTCP@^1.1.1
+    tzapu/WiFiManager@^2.0.17
 build_flags =
     -DCORE_DEBUG_LEVEL=3
     -DCONFIG_ARDUHAL_LOG_COLORS=0
@@ -33,6 +33,9 @@ board_build.filesystem = littlefs
 lib_deps =
     ${env.lib_deps}
     me-no-dev/ESPAsyncTCP@^1.2.2
+    khoih-prog/ESPAsync_WiFiManager@^1.15.1
+    devyte/ESPAsyncDNSServer@^1.0.0
+    https://github.com/me-no-dev/ESPAsyncUDP.git
 build_flags =
     -DARDUINOJSON_ENABLE_ARDUINO_STRING=1
     -DASYNC_TCP_SSL_ENABLED=0

@@ -1,0 +1,57 @@
+{
+  "name": "YUMA Stratum Proxy",
+  "version": "93c7170-dirty",
+  "builds": [
+    {
+      "chipFamily": "esp32",
+      "variant": "standard",
+      "parts": [
+        {
+          "path": "firmware/esp32/standard/bootloader.bin",
+          "offset": 4096
+        },
+        {
+          "path": "firmware/esp32/standard/yuma-esp32-standard-93c7170-dirty.bin",
+          "offset": 65536
+        }
+      ]
+    }
+    ,
+    {
+      "chipFamily": "esp32",
+      "variant": "oled",
+      "parts": [
+        {
+          "path": "firmware/esp32/oled/bootloader.bin",
+          "offset": 4096
+        },
+        {
+          "path": "firmware/esp32/oled/yuma-esp32-oled-93c7170-dirty.bin",
+          "offset": 65536
+        }
+      ]
+    }
+    ,
+    {
+      "chipFamily": "esp8266",
+      "variant": "standard",
+      "parts": [
+        {
+          "path": "firmware/esp8266/standard/yuma-esp8266-standard-93c7170-dirty.bin",
+          "offset": 0
+        }
+      ]
+    }
+    ,
+    {
+      "chipFamily": "esp8266",
+      "variant": "oled",
+      "parts": [
+        {
+          "path": "firmware/esp8266/oled/yuma-esp8266-oled-93c7170-dirty.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

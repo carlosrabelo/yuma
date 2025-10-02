@@ -38,28 +38,41 @@ EOF
                 fi
                 first_entry=false
 
+                # Set appropriate offsets for chip type
+                local firmware_offset
+                local bootloader_offset
+                if [ "$chip" = "esp32" ]; then
+                    firmware_offset=65536
+                    bootloader_offset=4096
+                else
+                    firmware_offset=0
+                fi
+
                 # Add build entry
                 cat >> "$MANIFEST_FILE" << EOF
     {
       "chipFamily": "$chip",
       "variant": "$variant",
       "parts": [
-        {
-          "path": "firmware/$chip/$variant/yuma-$chip-$variant-$VERSION_CLEAN.bin",
-          "offset": 65536
-        }
 EOF
 
-                # Add bootloader for ESP32
+                # Add bootloader first for ESP32 (if exists)
                 if [ "$chip" = "esp32" ] && [ -f "$FIRMWARE_DIR/$chip/$variant/bootloader.bin" ]; then
                     cat >> "$MANIFEST_FILE" << EOF
-        ,
         {
           "path": "firmware/$chip/$variant/bootloader.bin",
-          "offset": 4096
-        }
+          "offset": $bootloader_offset
+        },
 EOF
                 fi
+
+                # Add main firmware
+                cat >> "$MANIFEST_FILE" << EOF
+        {
+          "path": "firmware/$chip/$variant/yuma-$chip-$variant-$VERSION_CLEAN.bin",
+          "offset": $firmware_offset
+        }
+EOF
 
                 # Close parts array and build object
                 echo "      ]" >> "$MANIFEST_FILE"

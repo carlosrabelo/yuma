@@ -54,9 +54,22 @@ build_and_copy() {
     fi
 
     # Copy bootloader for ESP32
-    if [ "$chip" = "esp32" ] && [ -f "$build_path/bootloader.bin" ]; then
-        cp "$build_path/bootloader.bin" "$target_dir/"
-        echo "    ✅ $target_dir/bootloader.bin"
+    if [ "$chip" = "esp32" ]; then
+        # Try different possible bootloader locations
+        local bootloader_found=false
+        for bootloader_path in "$build_path/bootloader.bin" "$build_path/bootloader_dio_40m.bin" ".pio/build/$env/bootloader_dio_40m.bin"; do
+            if [ -f "$bootloader_path" ]; then
+                cp "$bootloader_path" "$target_dir/bootloader.bin"
+                echo "    ✅ $target_dir/bootloader.bin (from $(basename $bootloader_path))"
+                bootloader_found=true
+                break
+            fi
+        done
+
+        if [ "$bootloader_found" = false ]; then
+            echo "    ⚠️  Bootloader not found for $env - checking build directory:"
+            find "$build_path" -name "*boot*" -type f | head -5
+        fi
     fi
 
     return 0
@@ -100,7 +113,7 @@ case "$1" in
         build_esp8266
 
         # Generate manifest
-        "$SCRIPT_DIR/generate_manifest.sh"
+        "$SCRIPT_DIR/generate_manifest.sh" generate
 
         echo "✅ All firmware binaries generated in $ASSETS_DIR/"
         ;;

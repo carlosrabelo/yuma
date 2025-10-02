@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUMA Web Flasher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .warning.show {
+            display: block;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .variant-selection {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .chip-info {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            color: #1976d2;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .chip-info.show {
+            display: block;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-item input[type="radio"] {
+            width: auto;
+        }
+
+        .console {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Consolas', 'Monaco', monospace;
+            padding: 20px;
+            border-radius: 8px;
+            height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e1e8ed;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        @media (max-width: 768px) {
+            .radio-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .radio-item {
+                justify-content: center;
+            }
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ YUMA Web Flasher</h1>
+            <p>Flash YUMA Stratum Proxy firmware to your ESP32 or ESP8266 device</p>
+        </div>
+
+        <div class="content">
+            <div class="warning" id="browserWarning">
+                <strong>⚠️ Browser Compatibility:</strong> This tool requires Chrome, Edge, or another Chromium-based browser with Web Serial API support. Safari is not supported.
+            </div>
+
+            <div class="chip-info" id="chipInfo">
+                <strong>🔍 Detected Chip:</strong> <span id="detectedChip">Will be detected automatically</span>
+            </div>
+
+            <div class="form-section">
+                <h3>⚙️ Firmware Configuration</h3>
+
+                <div class="variant-selection">
+                    <label><strong>Select Firmware Variant:</strong></label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="standard" name="variant" value="standard" checked>
+                            <label for="standard">🔧 Standard (Basic Features)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="oled" name="variant" value="oled">
+                            <label for="oled">📺 OLED Display Support</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="baudrate">Baud Rate:</label>
+                    <select id="baudrate">
+                        <option value="921600">921600</option>
+                        <option value="460800">460800</option>
+                        <option value="230400">230400</option>
+                        <option value="115200">115200</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>📡 Flash Operations</h3>
+
+                <div class="form-group">
+                    <button id="connectBtn">Connect Device</button>
+                </div>
+
+                <div class="form-group">
+                    <button id="flashBtn" disabled>Flash Firmware</button>
+                </div>
+
+                <div class="form-group">
+                    <button id="eraseBtn" disabled>Erase Flash</button>
+                </div>
+            </div>
+
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="status" id="statusDiv"></div>
+
+            <div class="console" id="console">Ready to flash YUMA firmware...\nSelect your device configuration and click "Connect Device" to begin.\n</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>YUMA Stratum Proxy - Web-based ESP firmware flasher</p>
+        <p>Make sure your device is in download mode before flashing</p>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "pako": "https://unpkg.com/pako@2.1.0/dist/pako.esm.mjs",
+                "buffer": "https://cdn.skypack.dev/buffer",
+                "buffer/": "https://cdn.skypack.dev/buffer/",
+                "buffer/index": "https://cdn.skypack.dev/buffer"
+            }
+        }
+    </script>
+    <script type="module">
+        // Import ESPLoader from ES6 modules
+        import { ESPLoader, Transport } from './js/esptool/lib/index.js';
+
+        console.log('ESPToolJS modules loaded:', { ESPLoader, Transport });
+
+        // ESPToolJS is now available directly
+
+        // ESPToolJS ready
+
+        // Global variables
+        let esploader;
+        let device;
+        let transport;
+        let manifestData = null;
+        let detectedChip = null;
+
+        // DOM elements (will be initialized after DOM ready)
+        let connectBtn, flashBtn, eraseBtn, consoleElement, progressBar, progressFill, statusDiv;
+
+        // Console logging
+        function logToConsole(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            if (consoleElement) {
+                consoleElement.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+                consoleElement.scrollTop = consoleElement.scrollHeight;
+            }
+        }
+
+        // Status display
+        function showStatus(message, type = 'info') {
+            if (statusDiv) {
+                statusDiv.textContent = message;
+                statusDiv.className = `status ${type}`;
+                statusDiv.style.display = 'block';
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Progress bar
+        function updateProgress(percentage) {
+            if (progressFill && progressBar) {
+                progressFill.style.width = `${percentage}%`;
+                if (percentage > 0) {
+                    progressBar.style.display = 'block';
+                } else {
+                    progressBar.style.display = 'none';
+                }
+            }
+        }
+
+        // Load manifest.json
+        async function loadManifest() {
+            const manifestUrls = ['./manifest.json'];
+            let lastError = null;
+
+            for (const url of manifestUrls) {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    manifestData = await response.json();
+                    logToConsole(`Firmware manifest loaded successfully from ${url}`);
+                    return true;
+                } catch (error) {
+                    lastError = error;
+                    console.warn(`Manifest load attempt failed for ${url}:`, error);
+                }
+            }
+
+            logToConsole(`Failed to load manifest: ${lastError ? lastError.message : 'unknown error'}`, 'error');
+            return false;
+        }
+
+        // Store detected chip information
+        function setDetectedChip(chipName) {
+            if (!chipName) {
+                return false;
+            }
+
+            const normalized = chipName.toLowerCase();
+            let chipValue = null;
+
+            if (normalized.includes('8266')) {
+                chipValue = 'esp8266';
+            } else if (normalized.includes('32')) {
+                chipValue = 'esp32';
+            }
+
+            if (!chipValue) {
+                logToConsole(`Detected chip ${chipName}, but no preset mapping available`, 'error');
+                showStatus(`Unsupported chip: ${chipName}`, 'error');
+                return false;
+            }
+
+            detectedChip = chipValue;
+
+            // Update UI to show detected chip
+            const chipInfoDiv = document.getElementById('chipInfo');
+            const detectedChipSpan = document.getElementById('detectedChip');
+            if (chipInfoDiv && detectedChipSpan) {
+                detectedChipSpan.textContent = `${chipName} (${chipValue.toUpperCase()})`;
+                chipInfoDiv.classList.add('show');
+            }
+
+            logToConsole(`Detected chip: ${chipName} (${chipValue.toUpperCase()})`, 'success');
+            return true;
+        }
+
+        // Get selected configuration
+        function getSelectedConfig() {
+            if (!detectedChip) {
+                showStatus('No chip detected. Please connect device first.', 'error');
+                return null;
+            }
+
+            const variant = document.querySelector('input[name="variant"]:checked').value;
+            return { chip: detectedChip, variant };
+        }
+
+        // Find firmware in manifest
+        function findFirmware() {
+            if (!manifestData || !manifestData.builds) {
+                return null;
+            }
+
+            const config = getSelectedConfig();
+            if (!config) {
+                return null;
+            }
+
+            const { chip, variant } = config;
+            return manifestData.builds.find(build =>
+                build.chipFamily === chip && build.variant === variant
+            );
+        }
+
+        // Connect to device function
+        async function connectDevice() {
+            console.log('Connect button clicked');
+            console.log('Navigator serial available:', !!navigator.serial);
+            console.log('ESPLoader available:', !!ESPLoader);
+            console.log('Transport available:', !!Transport);
+
+            if (!navigator.serial) {
+                showStatus('Web Serial API not supported in this browser', 'error');
+                logToConsole('Web Serial API not supported', 'error');
+                return;
+            }
+
+            if (connectBtn.textContent === 'Disconnect') {
+                // Disconnect
+                try {
+                    if (transport) {
+                        await transport.disconnect();
+                    }
+                    logToConsole('Disconnected from device', 'success');
+                    showStatus('Disconnected', 'info');
+                    connectBtn.textContent = 'Connect Device';
+                    flashBtn.disabled = true;
+                    eraseBtn.disabled = true;
+                    device = null;
+                    transport = null;
+                    esploader = null;
+                    detectedChip = null;
+
+                    // Hide chip info
+                    const chipInfoDiv = document.getElementById('chipInfo');
+                    if (chipInfoDiv) {
+                        chipInfoDiv.classList.remove('show');
+                    }
+                } catch (error) {
+                    logToConsole(`Disconnect error: ${error.message}`, 'error');
+                }
+                return;
+            }
+
+            try {
+                logToConsole('Requesting device access...');
+                console.log('About to call navigator.serial.requestPort()');
+
+                device = await navigator.serial.requestPort({});
+                console.log('Device selected:', device);
+
+                if (!device) {
+                    throw new Error('No device selected');
+                }
+
+                logToConsole('Opening device connection...');
+                transport = new Transport(device, true);
+
+                const baudrate = parseInt(document.getElementById('baudrate').value);
+                esploader = new ESPLoader({
+                    transport,
+                    baudrate,
+                    terminal,
+                    enableTracing: true
+                });
+
+                logToConsole('Connecting to chip...');
+                await esploader.main();
+
+                logToConsole(`Connected to ${esploader.chip.CHIP_NAME}`, 'success');
+                showStatus(`Connected to ${esploader.chip.CHIP_NAME}`, 'success');
+
+                setDetectedChip(esploader.chip && esploader.chip.CHIP_NAME);
+
+                connectBtn.textContent = 'Disconnect';
+                flashBtn.disabled = false;
+                eraseBtn.disabled = false;
+
+                // Load manifest if not loaded
+                if (!manifestData) {
+                    await loadManifest();
+                }
+
+            } catch (error) {
+                logToConsole(`Connection failed: ${error.message}`, 'error');
+                showStatus(`Connection failed: ${error.message}`, 'error');
+                connectBtn.textContent = 'Connect Device';
+                flashBtn.disabled = true;
+                eraseBtn.disabled = true;
+            }
+        }
+
+        // Flash firmware function
+        async function flashFirmware() {
+            if (!esploader) {
+                showStatus('No device connected', 'error');
+                return;
+            }
+
+            const firmware = findFirmware();
+            if (!firmware) {
+                showStatus('No firmware found for selected configuration', 'error');
+                return;
+            }
+
+            try {
+                logToConsole('Starting firmware flash...');
+                showStatus('Flashing firmware...', 'info');
+                updateProgress(0);
+
+                // Prepare files for flashing
+                const fileArray = [];
+                for (const part of firmware.parts) {
+                    const url = `./${part.path}`;
+                    logToConsole(`Loading ${part.path}...`);
+
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${part.path}`);
+                    }
+
+                    const buffer = await response.arrayBuffer();
+                    const byteArray = new Uint8Array(buffer);
+                    const binaryString = esploader.ui8ToBstr(byteArray);
+
+                    fileArray.push({
+                        data: binaryString,
+                        address: part.offset,
+                        size: byteArray.length
+                    });
+                }
+
+                const totalSize = fileArray.reduce((sum, file) => sum + file.size, 0);
+                const cumulativeSizes = [];
+                let runningSize = 0;
+                for (const file of fileArray) {
+                    cumulativeSizes.push(runningSize);
+                    runningSize += file.size;
+                }
+
+                logToConsole('Starting flash process...');
+
+                let overallBytesWritten = 0;
+
+                await esploader.writeFlash({
+                    fileArray: fileArray.map(({ data, address }) => ({ data, address })),
+                    flashSize: 'keep',
+                    flashMode: 'keep',
+                    flashFreq: 'keep',
+                    eraseAll: false,
+                    compress: true,
+                    reportProgress: (fileIndex, bytesWritten, totalBytes) => {
+                        overallBytesWritten = cumulativeSizes[fileIndex] + bytesWritten;
+                        const overallProgress = totalSize > 0 ? (overallBytesWritten / totalSize) * 100 : 0;
+                        updateProgress(overallProgress);
+                        if (bytesWritten === totalBytes) {
+                            logToConsole(`Completed file ${fileIndex + 1}/${fileArray.length}`);
+                        }
+                    }
+                });
+
+                logToConsole('Firmware flashed successfully!', 'success');
+                showStatus('Firmware flashed successfully! You can now reset your device.', 'success');
+                updateProgress(0);
+
+            } catch (error) {
+                logToConsole(`Flash failed: ${error.message}`, 'error');
+                showStatus(`Flash failed: ${error.message}`, 'error');
+                updateProgress(0);
+            }
+        }
+
+        // Erase flash function
+        async function eraseFlash() {
+            if (!esploader) {
+                showStatus('No device connected', 'error');
+                return;
+            }
+
+            try {
+                logToConsole('Erasing flash memory...');
+                showStatus('Erasing flash...', 'info');
+                updateProgress(50);
+
+                await esploader.eraseFlash();
+
+                logToConsole('Flash erased successfully!', 'success');
+                showStatus('Flash erased successfully!', 'success');
+                updateProgress(0);
+
+            } catch (error) {
+                logToConsole(`Erase failed: ${error.message}`, 'error');
+                showStatus(`Erase failed: ${error.message}`, 'error');
+                updateProgress(0);
+            }
+        }
+
+        // Terminal interface for ESPLoader
+        const terminal = {
+            clean() {
+                if (consoleElement) {
+                    consoleElement.textContent = '';
+                }
+            },
+            writeLine(data) {
+                if (consoleElement) {
+                    consoleElement.textContent += data + '\n';
+                    consoleElement.scrollTop = consoleElement.scrollHeight;
+                }
+            },
+            write(data) {
+                if (consoleElement) {
+                    consoleElement.textContent += data;
+                    consoleElement.scrollTop = consoleElement.scrollHeight;
+                }
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize DOM elements
+            connectBtn = document.getElementById('connectBtn');
+            flashBtn = document.getElementById('flashBtn');
+            eraseBtn = document.getElementById('eraseBtn');
+            consoleElement = document.getElementById('console');
+            progressBar = document.getElementById('progressBar');
+            progressFill = document.getElementById('progressFill');
+            statusDiv = document.getElementById('statusDiv');
+
+            logToConsole('YUMA Web Flasher initialized');
+            logToConsole(`Current URL: ${window.location.href}`);
+            logToConsole(`Protocol: ${window.location.protocol}`);
+            logToConsole(`Is secure context: ${window.isSecureContext}`);
+
+            // ESPToolJS is loaded via ES6 modules
+            logToConsole('ESPToolJS library ready');
+
+            // Browser compatibility check
+            if (!navigator.serial) {
+                document.getElementById('browserWarning').classList.add('show');
+                logToConsole('Web Serial API not supported in this browser', 'error');
+                logToConsole('Note: Web Serial API requires HTTPS or localhost', 'error');
+            } else {
+                logToConsole('Web Serial API supported - ready to connect');
+                logToConsole('Available serial ports can be requested by user gesture');
+
+                // Test requestPort availability
+                if (typeof navigator.serial.requestPort === 'function') {
+                    logToConsole('navigator.serial.requestPort is available');
+                } else {
+                    logToConsole('navigator.serial.requestPort is NOT available', 'error');
+                }
+            }
+
+            // Add event listeners
+            connectBtn.addEventListener('click', connectDevice);
+            flashBtn.addEventListener('click', flashFirmware);
+            eraseBtn.addEventListener('click', eraseFlash);
+
+            logToConsole('Select your device configuration and connect to begin');
+        });
+    </script>
+</body>
+</html>

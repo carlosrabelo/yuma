@@ -29,8 +29,8 @@ SRC_DIR		= src
 BUILD_DIR	= .pio/build/$(BUILD_ENV)
 ASSETS_DIR	= assets
 FIRMWARE_DIR	= $(ASSETS_DIR)/firmware
-MONITOR_PORT	= /dev/ttyUSB1
-UPLOAD_PORT	= /dev/ttyUSB1
+MONITOR_PORT	= /dev/ttyUSB2
+UPLOAD_PORT	= /dev/ttyUSB2
 MONITOR_SPEED	= 115200
 
 # Version extraction from git
@@ -47,7 +47,7 @@ PIO_ACTIVATE	= . $(PYTHON_VENV)/bin/activate &&
 # Default target - show help
 .DEFAULT_GOAL := help
 
-.PHONY: help all build upload monitor clean install deps lint format check check-pio detect erase _run-pio assets assets-esp32 assets-esp8266 assets-clean manifest
+.PHONY: help all build upload monitor clean install deps lint format check check-pio detect erase _run-pio assets assets-esp32 assets-esp8266 assets-clean manifest serve
 
 help:	## Show this help
 	@echo "YUMA Stratum Proxy - Available targets (BOARD=$(BOARD)):"
@@ -125,3 +125,9 @@ assets-clean:	## Clean assets directory
 
 manifest: ## Generate manifest.json for web flasher
 	@./scripts/generate_manifest.sh generate
+
+serve: ## Start Python web server for local testing (http://localhost:8000)
+	@echo "🌐 Starting local web server..."
+	@echo "Web flasher available at: http://localhost:8000"
+	@echo "Press Ctrl+C to stop server"
+	@cd docs && python3 -m http.server 8000
